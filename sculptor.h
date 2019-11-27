@@ -1,6 +1,11 @@
 #ifndef SCULPTOR_H
 #define SCULPTOR_H
 
+#include <iostream>
+#include <fstream>
+#include <iomanip>
+#include <string>
+
 /**
  * @brief Estrutura do voxel.
  */
@@ -34,9 +39,16 @@ void PutSphere (int xcenter, int ycenter, int zcenter, int radius);
 void CutSphere (int xcenter, int ycenter, int zcenter, int radius);
 void PutEllipsoid (int xcenter, int ycenter, int zcenter, int rx, int ry, int rz);
 void CutEllipsoid (int xcenter, int ycenter, int zcenter, int rx, int ry, int rz);
-void writeOFF(char* filename);
-};
+void printFigure();
+//void writeOFF(char* filename);
+void writeOFF(const std::string filename);
 
+int getNx() const;
+int getNy() const;
+int getNz() const;
+Voxel ***getV() const;
+
+};
 
 
 #endif // SCULPTOR_H

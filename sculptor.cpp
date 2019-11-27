@@ -3,6 +3,8 @@
 #include <cstdlib>
 #include <string>
 #include <fstream>
+#include <cmath>
+#include <string>
 #include "sculptor.h"
 
 /* v[x][y][z].r=r;
@@ -25,6 +27,19 @@ void Sculptor::setColor(float r, float g, float b, float a) {
 
 /* Equação do elipsóide ((x-xc)^2)/(rx)^2 */
 using namespace std;
+
+int Sculptor::getNx() const{
+    return nx;
+}
+int Sculptor::getNy() const{
+    return ny;
+}
+int Sculptor::getNz() const{
+    return nz;
+}
+Voxel ***Sculptor::getV() const{
+    return v;
+}
 
 /**
  * @brief Construtor da classe
@@ -130,94 +145,114 @@ void Sculptor::CutVoxel (int x, int y, int z) {
     v[x][y][z].is0n=false;
 }
 
-//______________________________________________________________________________________________________________***********________
+// ---------------************************-------------
+//                     PRINT FIGURE
+// ---------------************************-------------
 
-void Sculptor::writeOFF (char* filename) {
-    int n_voxel=0;
-
-    /* Para verificar o seu voxel e seu arredor */
-    int aux[nx][ny][nz];
-    bool test_x, test_y, test_z;
-
-    for(int i = 0; i < nx; i++){
-           for(int j = 0; j < ny; j++){
-               for(int k = 0; k < nz; k++){
-                   aux[i][j][k] = 0;
-               }
-           }
+void Sculptor::printFigure()
+{
+    cout << "red channel" << endl;
+    for (int i = 0; i < this->nx ; i++){
+        cout << i << endl;
+        for (int j = 0; j < this->ny; j++) {
+            for (int k = 0; k < this->nz; k++) {
+                cout << v[i][j][k].r << " " ;
+            }
+            cout << endl;
+        }
+        cout << "\n\n";
     }
 
-    ofstream fout (filename);
-    fout<<"OFF"<<endl;
+    cout << "green channel" << endl;
+    for (int i = 0; i < this->nx ; i++){
+        cout << i << endl;
+        for (int j = 0; j < this->ny; j++) {
+            for (int k = 0; k < this->nz; k++) {
+                cout << v[i][j][k].g << " " ;
+            }
+            cout << endl;
+        }
+        cout << "\n\n";
+    }
 
-    for(int i = 0; i < nx-2; i++) {
-      for(int j = 0; j < ny-2; j++) {
-         for(int k = 0; k < nz-2; k++) {
-             test_x = false, test_y = false, test_z=false;
+    cout << "blue channel" << endl;
+    for (int i = 0; i < this->nx ; i++){
+        cout << i << endl;
+        for (int j = 0; j < this->ny; j++) {
+            for (int k = 0; k < this->nz; k++) {
+                cout << v[i][j][k].b << " " ;
+            }
+            cout << endl;
+        }
+        cout << "\n\n";
+    }
 
-             //Verificacao ao redor do voxel
-              if(v[i][j][k].is0n && v[i+2][j][k].is0n){
-                   test_x = true;
-               }
+    cout << "alpha" << endl;
+    for (int i = 0; i < this->nx ; i++){
+        cout << i << endl;
+        for (int j = 0; j < this->ny; j++) {
+            for (int k = 0; k < this->nz; k++) {
+                cout << v[i][j][k].a << " " ;
+            }
+            cout << endl;
+        }
+        cout << "\n\n";
+    }
 
-              if(v[i][j][k].is0n && v[i][j+2][k].is0n){
-                   test_y = true;
-               }
+    cout << "ison" << endl;
+    for (int i = 0; i < this->nx ; i++){
+        cout << i << endl;
+        for (int j = 0; j < this->ny; j++) {
+            for (int k = 0; k < this->nz; k++) {
+                cout << v[i][j][k].is0n << " " ;
+            }
+            cout << endl;
+        }
+        cout << "\n\n";
+    }
+}
 
-              if(v[i][j][k].is0n && v[i][j][k+2].is0n){
-                   test_z = true;
-                   }
+void Sculptor::writeOFF (string filename){
 
-              if(test_x || test_y || test_z){
-                   aux[i+1][j+1][k+1] = 1;
-                   }
-               }
-           }
-       }
+
+    int n_voxel = 0;
+    ofstream outfile (filename);
+    outfile<<"OFF"<<endl;
 
     for(int i = 0; i < nx; i++){
-       for(int j = 0; j < ny; j++){
-          for(int k = 0; k < nz; k++){
-               if (v[i][j][k].is0n && aux[i][j][k] == 0){
-                        n_voxel++;
-                   }
-                }
-            }
-       }
-
-  fout << 8*n_voxel << " " << 6*n_voxel << " " << 0 << std::endl;
-
-     for(int i = 0; i < nx; i++){
         for(int j = 0; j < ny; j++){
-           for(int k = 0; k < nz; k++){
-               if (v[i][j][k].is0n && aux[i][j][k] == 0){
-                        fout << i - 0.5 << " " << j + 0.5 << " " << k - 0.5 << endl;
-                        fout << i - 0.5 << " " << j - 0.5 << " " << k - 0.5 << endl;
-                        fout << i + 0.5 << " " << j - 0.5 << " " << k - 0.5 << endl;
-                        fout << i + 0.5 << " " << j + 0.5 << " " << k - 0.5 << endl;
-                        fout << i - 0.5 << " " << j + 0.5 << " " << k + 0.5 << endl;
-                        fout << i - 0.5 << " " << j - 0.5 << " " << k + 0.5 << endl;
-                        fout << i + 0.5 << " " << j - 0.5 << " " << k + 0.5 << endl;
-                        fout << i + 0.5 << " " << j + 0.5 << " " << k + 0.5 << endl;
-                    }
-           }
-        }
-     }
+            for(int k = 0; k < nz; k++){
+                if (v[i][j][k].is0n == true){
+                    n_voxel++;
+                }}}}
 
-     for(int i = 0; i < nx; i++){
+
+    outfile << 8*n_voxel << " " << 6*n_voxel << " " << 0 << std::endl;
+    for(int i = 0; i < nx; i++){
         for(int j = 0; j < ny; j++){
-           for(int k = 0; k < nz; k++){
-              if (v[i][j][k].is0n && aux[i][j][k] ==0){
-                   fout << 4 << " " << 0 + 8*i << " " << 3 + 8*i << " " << 2 + 8*i << " " << 1 + 8*i << " " << v[i][j][k].r << " " << v[i][j][k].g << " " << v[i][j][k].b << " " << v[i][j][k].a << " " << endl;
-                   fout << 4 << " " << 4 + 8*i << " " << 5 + 8*i << " " << 6 + 8*i << " " << 7 + 8*i << " " << v[i][j][k].r << " " << v[i][j][k].g << " " << v[i][j][k].b << " " << v[i][j][k].a << " " << endl;
-                   fout << 4 << " " << 0 + 8*i << " " << 1 + 8*i << " " << 5 + 8*i << " " << 4 + 8*i << " " << v[i][j][k].r << " " << v[i][j][k].g << " " << v[i][j][k].b << " " << v[i][j][k].a << " " << endl;
-                   fout << 4 << " " << 0 + 8*i << " " << 4 + 8*i << " " << 7 + 8*i << " " << 3 + 8*i << " " << v[i][j][k].r << " " << v[i][j][k].g << " " << v[i][j][k].b << " " << v[i][j][k].a << " " << endl;
-                   fout << 4 << " " << 3 + 8*i << " " << 7 + 8*i << " " << 6 + 8*i << " " << 2 + 8*i << " " << v[i][j][k].r << " " << v[i][j][k].g << " " << v[i][j][k].b << " " << v[i][j][k].a << " " << endl;
-                   fout << 4 << " " << 1 + 8*i << " " << 2 + 8*i << " " << 6 + 8*i << " " << 5 + 8*i << " " << v[i][j][k].r << " " << v[i][j][k].g << " " << v[i][j][k].b << " " << v[i][j][k].a << " " << endl;
-                   }
-           }
-        }
-     }
+            for(int k = 0; k < nz; k++){
+                if (v[i][j][k].is0n){
+                    outfile << i - 0.5 << " " << j + 0.5 << " " << k - 0.5 << endl;
+                    outfile << i - 0.5 << " " << j - 0.5 << " " << k - 0.5 << endl;
+                    outfile << i + 0.5 << " " << j - 0.5 << " " << k - 0.5 << endl;
+                    outfile << i + 0.5 << " " << j + 0.5 << " " << k - 0.5 << endl;
+                    outfile << i - 0.5 << " " << j + 0.5 << " " << k + 0.5 << endl;
+                    outfile << i - 0.5 << " " << j - 0.5 << " " << k + 0.5 << endl;
+                    outfile << i + 0.5 << " " << j - 0.5 << " " << k + 0.5 << endl;
+                    outfile << i + 0.5 << " " << j + 0.5 << " " << k + 0.5 << endl;
+                }}}}
 
+    for(int i = 0; i < nx; i++){
+        for(int j = 0; j < ny; j++){
+            for(int k = 0; k < nz; k++){
+                if (v[i][j][k].is0n){
+                    outfile << 4 << " " << 0 + 8*i << " " << 3 + 8*i << " " << 2 + 8*i << " " << 1 + 8*i << " " << v[i][j][k].r << " " << v[i][j][k].g << " " << v[i][j][k].b << " " << v[i][j][k].a << " " << endl;
+                    outfile << 4 << " " << 4 + 8*i << " " << 5 + 8*i << " " << 6 + 8*i << " " << 7 + 8*i << " " << v[i][j][k].r << " " << v[i][j][k].g << " " << v[i][j][k].b << " " << v[i][j][k].a << " " << endl;
+                    outfile << 4 << " " << 0 + 8*i << " " << 1 + 8*i << " " << 5 + 8*i << " " << 4 + 8*i << " " << v[i][j][k].r << " " << v[i][j][k].g << " " << v[i][j][k].b << " " << v[i][j][k].a << " " << endl;
+                    outfile << 4 << " " << 0 + 8*i << " " << 4 + 8*i << " " << 7 + 8*i << " " << 3 + 8*i << " " << v[i][j][k].r << " " << v[i][j][k].g << " " << v[i][j][k].b << " " << v[i][j][k].a << " " << endl;
+                    outfile << 4 << " " << 3 + 8*i << " " << 7 + 8*i << " " << 6 + 8*i << " " << 2 + 8*i << " " << v[i][j][k].r << " " << v[i][j][k].g << " " << v[i][j][k].b << " " << v[i][j][k].a << " " << endl;
+                    outfile << 4 << " " << 1 + 8*i << " " << 2 + 8*i << " " << 6 + 8*i << " " << 5 + 8*i << " " << v[i][j][k].r << " " << v[i][j][k].g << " " << v[i][j][k].b << " " << v[i][j][k].a << " " << endl;
+                }}}}
 
+  outfile.close();
 }
